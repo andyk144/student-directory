@@ -1,12 +1,12 @@
 @students = []
 
 def input_students
+  puts "You selected \"Input the students\""
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
   name = STDIN.gets.chomp
   while !name.empty? do
     update_students_list({name: name, cohort: :november})
-    puts "Now we have #{@students.count} students"
     name = gets.chomp
   end
 end
@@ -33,12 +33,13 @@ end
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save the list"
+  puts "4. Load the list"
   puts "9. Exit"
 end
 
 def show_students
+  puts "You selected \"Show the students\""
   print_header
   print_students_list
   print_footer
@@ -46,19 +47,14 @@ end
 
 def process(selection)
   case selection
-    when "1"
-      input_students
-    when "2"
-      show_students
-    when "3"
-      save_students
-    when "4"
-      load_students
-    when "9"
-      exit
-    else
-      puts "I don't know what you mean, try again"
-    end
+  when "1" then input_students
+  when "2" then show_students
+  when "3" then save_students
+  when "4" then load_menu
+  when "9" then exit
+  else
+    puts "I don't know what you mean, try again"
+  end
 end
 
 def interactive_menu
@@ -69,13 +65,25 @@ def interactive_menu
 end
 
 def save_students
-  file = File.open("students.csv", "w")
+  puts "Please enter a filename to save your student list to"
+  puts "Hit return to save to students.csv"
+  filename = STDIN.gets.chomp
+  if filename.empty?
+    filename = "students.csv"
+  end
+  file = File.open(filename, "w")
   @students.each do |student|
     student_data = [student[:name], student[:cohort]]
     csv_line = student_data.join(",")
     file.puts csv_line
   end
+  puts "Your students list has been saved succesfully to #{filename}"
   file.close
+end
+
+def load_menu
+  puts "Please enter the name of the file to open"
+  filecheck(STDIN.gets.chomp)
 end
 
 def load_students(filename = "students.csv")
@@ -84,17 +92,22 @@ def load_students(filename = "students.csv")
     name, cohort = line.chomp.split(',')
     update_students_list({name: name, cohort: cohort.to_sym})
   end
+  puts "#{filename} loaded."
+  puts "#{@students.count} students in the list"
   file.close
 end
 
 def try_load_students
   filename = ARGV.first
+  filecheck(filename)
+end
+
+def filecheck(filename)
+  @students.clear
   if filename.nil?
-    load_students("students.csv")
-    puts "Loaded #{@students.count} from #{filename}"
+    load_students
   elsif File.exists?(filename)
     load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
   else
     puts "Sorry, #{filename} doesn't exist."
     exit
