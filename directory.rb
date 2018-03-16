@@ -7,6 +7,7 @@ def input_students
   name = STDIN.gets.chomp
   while !name.empty? do
     update_students_list({name: name, cohort: :november})
+    puts "We now have #{@students.count} students."
     name = gets.chomp
   end
 end
@@ -71,14 +72,14 @@ def save_students
   if filename.empty?
     filename = "students.csv"
   end
-  file = File.open(filename, "w")
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
+  File.open(filename, "w") do |file|
+    @students.each do |student|
+      student_data = [student[:name], student[:cohort]]
+      csv_line = student_data.join(",")
+      file.puts csv_line
+    end
+    puts "Your students list has been saved succesfully to #{filename}"
   end
-  puts "Your students list has been saved succesfully to #{filename}"
-  file.close
 end
 
 def load_menu
@@ -87,14 +88,14 @@ def load_menu
 end
 
 def load_students(filename = "students.csv")
-  file = File.open(filename, "r")
-  file.readlines.each do |line|
-    name, cohort = line.chomp.split(',')
-    update_students_list({name: name, cohort: cohort.to_sym})
-  end
+  File.open(filename, "r") do |file|
+    file.readlines.each do |line|
+      name, cohort = line.chomp.split(',')
+      update_students_list({name: name, cohort: cohort.to_sym})
+    end
   puts "#{filename} loaded."
   puts "#{@students.count} students in the list"
-  file.close
+  end
 end
 
 def try_load_students
